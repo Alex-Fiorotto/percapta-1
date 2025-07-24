@@ -11,7 +11,7 @@ if uploaded_file:
     df = pd.read_excel(uploaded_file)
 
     # Filtrando categorias indesejadas
-    categorias_excluir = ["MULTICLUBES - DAY-USE", "ECO LOUNGE", "EcoVip s/ Cadastro"]
+    categorias_excluir = ["MULTICLUBES - DAY-USE", "ECO LOUNGE", "EcoVip s/ Cadastro", "CASA DA ÁRVORE"]
     df = df[~df["Categoria"].isin(categorias_excluir)]
 
     # Agrupamento por categoria
@@ -39,3 +39,4 @@ if uploaded_file:
     # Exibição dos dados brutos abaixo do resumo
     st.subheader("Dados Brutos")
     st.dataframe(df)
+
