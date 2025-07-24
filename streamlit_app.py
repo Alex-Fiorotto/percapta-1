@@ -14,28 +14,32 @@ if uploaded_file:
     categorias_excluir = ["MULTICLUBES - DAY-USE", "ECO LOUNGE", "EcoVip s/ Cadastro", "CASA DA ÁRVORE"]
     df = df[~df["Categoria"].isin(categorias_excluir)]
 
-    # Novo resumo: por categoria e preço
+    # Criando resumo por categoria e preço com totais
     resumo_preco = df.groupby(["Categoria", "Preço"]).agg(
-        Quantidade=("Categoria", "count")
+        Quantidade=("Categoria", "count"),
+        Total=("Preço", lambda x: x.sum())
     ).reset_index()
 
-    # Calculando totais por categoria
+    # Adicionando linhas de totais por categoria
     totais_categoria = df.groupby("Categoria").agg(
-        Total_Quantidade=("Categoria", "count"),
-        Total_Preço=("Preço", "sum"),
-        Percapta=("Preço", "mean")
-    ).reset_index()
+        Preço=("Preço", "sum"),
+        Quantidade=("Categoria", "count")
+    ).assign(Total=lambda x: x["Preço"]).reset_index()
     
+    totais_categoria["Preço"] = "TOTAL"
+    
+    # Concatenando os dados detalhados com os totais
+    resumo_completo = pd.concat([resumo_preco, totais_categoria], ignore_index=True)
+    resumo_completo = resumo_completo.sort_values(["Categoria", "Preço"])
+
     # Formatação dos valores
-    resumo_preco["Preço"] = resumo_preco["Preço"].map(lambda x: f"R$ {x:,.2f}".replace(".", ","))
-    totais_categoria["Total_Preço"] = totais_categoria["Total_Preço"].map(lambda x: f"R$ {x:,.2f}".replace(".", ","))
-    totais_categoria["Percapta"] = totais_categoria["Percapta"].map(lambda x: f"R$ {x:,.2f}".replace(".", ","))
+    resumo_completo["Preço"] = resumo_completo["Preço"].apply(
+        lambda x: f"R$ {x:,.2f}".replace(".", ",") if isinstance(x, (int, float)) else x
+    )
+    resumo_completo["Total"] = resumo_completo["Total"].map(lambda x: f"R$ {x:,.2f}".replace(".", ","))
 
     st.subheader("Resumo de Acessos por Categoria e Preço")
-    st.dataframe(resumo_preco)
-
-    st.subheader("Totais por Categoria")
-    st.dataframe(totais_categoria)
+    st.dataframe(resumo_completo)
 
     # Total geral
     total_reconhecido = df["Preço"].sum()
