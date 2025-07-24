@@ -14,32 +14,17 @@ if uploaded_file:
     categorias_excluir = ["MULTICLUBES - DAY-USE", "ECO LOUNGE", "EcoVip s/ Cadastro", "CASA DA ÁRVORE"]
     df = df[~df["Categoria"].isin(categorias_excluir)]
 
-    # Criando resumo por categoria e preço com totais
+    # Criando resumo por categoria e preço com total na coluna
     resumo_preco = df.groupby(["Categoria", "Preço"]).agg(
         Quantidade=("Categoria", "count"),
-        Total=("Preço", lambda x: x.sum())
+        Total=("Preço", lambda x: f"R$ {x.sum():,.2f}".replace(".", ","))
     ).reset_index()
 
-    # Adicionando linhas de totais por categoria
-    totais_categoria = df.groupby("Categoria").agg(
-        Preço=("Preço", "sum"),
-        Quantidade=("Categoria", "count")
-    ).assign(Total=lambda x: x["Preço"]).reset_index()
-    
-    totais_categoria["Preço"] = "TOTAL"
-    
-    # Concatenando os dados detalhados com os totais
-    resumo_completo = pd.concat([resumo_preco, totais_categoria], ignore_index=True)
-    resumo_completo = resumo_completo.sort_values(["Categoria", "Preço"])
-
-    # Formatação dos valores
-    resumo_completo["Preço"] = resumo_completo["Preço"].apply(
-        lambda x: f"R$ {x:,.2f}".replace(".", ",") if isinstance(x, (int, float)) else x
-    )
-    resumo_completo["Total"] = resumo_completo["Total"].map(lambda x: f"R$ {x:,.2f}".replace(".", ","))
+    # Formatando o preço individual
+    resumo_preco["Preço"] = resumo_preco["Preço"].map(lambda x: f"R$ {x:,.2f}".replace(".", ","))
 
     st.subheader("Resumo de Acessos por Categoria e Preço")
-    st.dataframe(resumo_completo)
+    st.dataframe(resumo_preco)
 
     # Total geral
     total_reconhecido = df["Preço"].sum()
