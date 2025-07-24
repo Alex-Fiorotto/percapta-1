@@ -19,11 +19,23 @@ if uploaded_file:
         Quantidade=("Categoria", "count")
     ).reset_index()
 
-    # Formata valores com duas casas decimais e vírgula como separador decimal
+    # Calculando totais por categoria
+    totais_categoria = df.groupby("Categoria").agg(
+        Total_Quantidade=("Categoria", "count"),
+        Total_Preço=("Preço", "sum"),
+        Percapta=("Preço", "mean")
+    ).reset_index()
+    
+    # Formatação dos valores
     resumo_preco["Preço"] = resumo_preco["Preço"].map(lambda x: f"R$ {x:,.2f}".replace(".", ","))
+    totais_categoria["Total_Preço"] = totais_categoria["Total_Preço"].map(lambda x: f"R$ {x:,.2f}".replace(".", ","))
+    totais_categoria["Percapta"] = totais_categoria["Percapta"].map(lambda x: f"R$ {x:,.2f}".replace(".", ","))
 
     st.subheader("Resumo de Acessos por Categoria e Preço")
     st.dataframe(resumo_preco)
+
+    st.subheader("Totais por Categoria")
+    st.dataframe(totais_categoria)
 
     # Total geral
     total_reconhecido = df["Preço"].sum()
