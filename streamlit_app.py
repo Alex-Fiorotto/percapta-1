@@ -27,6 +27,14 @@ if uploaded_file:
     st.subheader("Resumo por Categoria")
     st.dataframe(resumo)
 
+    # Novo resumo: por categoria e preço
+    resumo_preco = df.groupby(["Categoria", "Preço"]).agg(
+        Quantidade=("Categoria", "count")
+    ).reset_index()
+
+    st.subheader("Resumo por Categoria e Preço")
+    st.dataframe(resumo_preco)
+
     # Total geral
     total_vendido = resumo["TotalVendido"].sum()
     total_ingressos = resumo["Quantidade"].sum()
@@ -39,4 +47,5 @@ if uploaded_file:
     # Exibição dos dados brutos abaixo do resumo
     st.subheader("Dados Brutos")
     st.dataframe(df)
+
 
