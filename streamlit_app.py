@@ -1,7 +1,5 @@
 import streamlit as st
 import pandas as pd
-from io import BytesIO
-from datetime import datetime
 
 st.title("Análise de Vendas de Ingressos")
 
@@ -12,9 +10,9 @@ if uploaded_file:
     # Leitura do Excel
     df = pd.read_excel(uploaded_file)
 
-    # Exibição dos dados brutos
-    st.subheader("Dados Brutos")
-    st.dataframe(df)
+    # Filtrando categorias indesejadas
+    categorias_excluir = ["MULTICLUBES - DAY-USE", "ECO LOUNGE", "EcoVip s/ Cadastro"]
+    df = df[~df["Categoria"].isin(categorias_excluir)]
 
     # Agrupamento por categoria
     resumo = df.groupby("Categoria").agg(
@@ -37,3 +35,7 @@ if uploaded_file:
     st.markdown(f"**Total Geral Vendido:** R$ {total_vendido:,.2f}")
     st.markdown(f"**Total de Ingressos:** {total_ingressos}")
     st.markdown(f"**Per Capta Geral:** R$ {percapta_geral:,.2f}")
+
+    # Exibição dos dados brutos abaixo do resumo
+    st.subheader("Dados Brutos")
+    st.dataframe(df)
