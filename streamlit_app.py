@@ -31,9 +31,17 @@ if uploaded_file:
     total_acessos = df.shape[0]
     percapta_geral = total_reconhecido / total_acessos if total_acessos > 0 else 0
 
+    # Calculando per capta sem bebês (assumindo que a categoria de bebês contém "BEBÊ" no nome)
+    df_sem_bebes = df[~df["Categoria"].str.contains("BEBÊ", case=False)]
+    total_sem_bebes = df_sem_bebes["Preço"].sum()
+    acessos_sem_bebes = df_sem_bebes.shape[0]
+    percapta_sem_bebes = total_sem_bebes / acessos_sem_bebes if acessos_sem_bebes > 0 else 0
+
     st.markdown(f"**Faturamento Total Reconhecido:** R$ {total_reconhecido:,.2f}".replace(".", ","))
     st.markdown(f"**Total de Acessos:** {total_acessos}")
     st.markdown(f"**Per Capta Geral:** R$ {percapta_geral:,.2f}".replace(".", ","))
+    st.markdown(f"**Per Capta sem Bebês:** R$ {percapta_sem_bebes:,.2f}".replace(".", ","))
+    st.markdown(f"*(Baseado em {acessos_sem_bebes} acessos sem bebês)*")
 
     # Exibição dos dados brutos abaixo do resumo
     st.subheader("Dados Brutos")
